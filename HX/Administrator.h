@@ -31,7 +31,8 @@ private:
 	QItemSelectionModel* selectmaterials;
 	QItemSelectionModel* selectcar;
 	Ui::Administrator ui;
-	void opentable(QSqlTableModel*&, QTableView*, QString, QItemSelectionModel*&);
+	void iniBarChart();
+	void buildBarChart();
 private slots:
 	void on_actInsert_triggered();
 	void on_actDelete_triggered();

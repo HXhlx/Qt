@@ -100,7 +100,7 @@
        </rect>
       </property>
      </widget>
-     <widget class="QChartView" name="graphicsView">
+     <widget class="QChartView" name="pView">
       <property name="geometry">
        <rect>
         <x>310</x>

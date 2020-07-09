@@ -28,8 +28,9 @@ private:
 	QItemSelectionModel* selectorder;
 	QItemSelectionModel* selectperformance;
 	Ui::Worker ui;
-	void opentable(QSqlTableModel*&, QTableView*, QString, QItemSelectionModel*&);
 	void Show();
+	void iniPieChart();
+	void buildPieChart();
 private slots:
 	void on_name_textEdited(const QString& arg);
 	void on_ID_textEdited(const QString& arg);

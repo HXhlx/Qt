@@ -4,13 +4,13 @@ Administrator::Administrator(QWidget* parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
-	opentable(tableadmin, ui.adminView, "administrator", selectadmin);
-	opentable(tableworker, ui.workerView, "worker", selectworker);
-	opentable(tableconsumer, ui.consumerView, "consumer", selectconsumer);
-	opentable(tableorder, ui.orderView, "order", selectorder);
-	opentable(tableperformance, ui.performanceView, "performance", selectperformance);
-	opentable(tablematerials, ui.materialsView, "materials", selectmaterials);
-	opentable(tablecar, ui.carView, "car", selectcar);
+	HX::mysql->opentable(this, tableadmin, ui.adminView, "admin", selectadmin);
+	HX::mysql->opentable(this,tableworker, ui.workerView, "worker", selectworker);
+	HX::mysql->opentable(this,tableconsumer, ui.consumerView, "consumer", selectconsumer);
+	HX::mysql->opentable(this,tableorder, ui.orderView, "order", selectorder);
+	HX::mysql->opentable(this,tableperformance, ui.performanceView, "performance", selectperformance);
+	HX::mysql->opentable(this,tablematerials, ui.materialsView, "materials", selectmaterials);
+	HX::mysql->opentable(this,tablecar, ui.carView, "car", selectcar);
 	table = tableadmin;
 	select = selectadmin;
 }
@@ -19,27 +19,23 @@ Administrator::~Administrator()
 {
 }
 
-void Administrator::opentable(QSqlTableModel*& table, QTableView* tableView, QString tablename, QItemSelectionModel*& select)
-{
-	table = new QSqlTableModel(this, HX::Database);
-	table->setTable(tablename);
-	table->setEditStrategy(QSqlTableModel::OnManualSubmit);
-	if (!(table->select()))
-	{
-		QMessageBox::critical(this, "错误", table->lastError().text());
-		return;
-	}
-	select = new QItemSelectionModel(table);
-	tableView->setModel(table);
-	tableView->setSelectionModel(select);
-}
-
 void Administrator::on_actInsert_triggered()
 {
 	table->insertRow(table->rowCount(), QModelIndex());
 	QModelIndex index = table->index(table->rowCount() - 1, 0);
 	select->clearSelection();
 	select->setCurrentIndex(index, QItemSelectionModel::Select);
+}
+
+void Administrator::iniBarChart()
+{
+	QChart* chart = new QChart();
+	chart->setTitle("员工业绩排行");
+	chart->setAnimationOptions(QChart::SeriesAnimations);
+}
+
+void Administrator::buildBarChart()
+{
 }
 
 void Administrator::on_actDelete_triggered()

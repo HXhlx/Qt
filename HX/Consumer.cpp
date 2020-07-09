@@ -15,26 +15,11 @@ Consumer::Consumer(QWidget* parent, QString name, QString password)
 		ID = query.value("ID").toString();
 	}
 	Show();
-	opentable(tableorder, ui.orderView, "order", selectorder);
+	HX::mysql->opentable(this, tableorder, ui.orderView, "order", selectorder, QString("CustomerID='%1'").arg(CustomerID));
 }
 
 Consumer::~Consumer()
 {
-}
-
-void Consumer::opentable(QSqlTableModel* &table, QTableView* tableView, QString tablename, QItemSelectionModel* &select)
-{
-	table = new QSqlTableModel(this, HX::Database);
-	table->setTable(tablename);
-	table->setEditStrategy(QSqlTableModel::OnManualSubmit);
-	if (!(table->select()))
-	{
-		QMessageBox::critical(this, "´íÎó", table->lastError().text());
-		return;
-	}
-	select = new QItemSelectionModel(table);
-	tableView->setModel(table);
-	tableView->setSelectionModel(select);
 }
 
 void Consumer::Show()

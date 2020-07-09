@@ -18,28 +18,12 @@ Worker::Worker(QWidget* parent, QString name, QString password)
 		phone = query.value("WorkPhone").toString();
 	}
 	Show();
-	opentable(tableperformance, ui.performanceView, "performance", selectperformance);
-	opentable(tableorder, ui.orderView, "order", selectorder);
+	HX::mysql->opentable(this, tableperformance, ui.performanceView, "performance", selectperformance, QString("WorkerID='%1'").arg(WorkerID));
+	HX::mysql->opentable(this, tableorder, ui.orderView, "order", selectorder, QString("WorkerID='%1'").arg(WorkerID));
 }
 
 Worker::~Worker()
 {
-}
-
-void Worker::opentable(QSqlTableModel* &table, QTableView* tableView, QString tablename, QItemSelectionModel* &select)
-{
-	table = new QSqlTableModel(this, HX::Database);
-	table->setTable(tablename);
-	table->setEditStrategy(QSqlTableModel::OnManualSubmit);
-	table->setFilter(QString("WorkerID='%1'").arg(WorkerID));
-	if (!(table->select()))
-	{
-		QMessageBox::critical(this, "´íÎó", table->lastError().text());
-		return;
-	}
-	select = new QItemSelectionModel(table);
-	tableView->setModel(table);
-	tableView->setSelectionModel(select);
 }
 
 void Worker::Show()
@@ -54,6 +38,15 @@ void Worker::Show()
 	else if (state == "Î¬ÐÞÖÐ")ui.comboBox->setCurrentIndex(1);
 	ui.Save->setEnabled(false);
 	ui.Cancel->setEnabled(false);
+}
+
+void Worker::iniPieChart()
+{
+	
+}
+
+void Worker::buildPieChart()
+{
 }
 
 void Worker::on_name_textEdited(const QString& arg)

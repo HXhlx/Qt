@@ -1,24 +1,10 @@
 #include "HX.h"
-QSqlDatabase HX::Database = QSqlDatabase::addDatabase("QMYSQL");
 HX::HX(QWidget* parent)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
 	ui.Register->setEnabled(false);
-	createconnect();
-}
-
-void HX::createconnect()
-{
-	Database.setHostName("localhost");
-	Database.setDatabaseName("dbo");
-	Database.setUserName("root");
-	Database.setPassword("hx19990627");
-	if (!Database.open())
-	{
-		QMessageBox::critical(this, "错误", Database.lastError().text());
-		return;
-	}
+	mysql = new MySQL(this, "dbo", "root", "hx19990627");
 }
 
 void HX::openWedget()
@@ -53,20 +39,16 @@ void HX::on_Login_clicked()
 {
 	QSqlQuery query;
 	query.exec(QString("select * from %1 where Name='%2' and Password='%3'").arg(table).arg(ui.username->text()).arg(ui.password->text()));
-	if (query.size() == -1)QMessageBox::warning(this, "登录失败", QString("用户名或密码错误\n") + QString("select * from %1 where Name='%2' and Password='%3'").arg(table).arg(ui.username->text()).arg(ui.password->text()));
+	if (query.size() == -1)QMessageBox::warning(this, "登录失败", "用户名或密码错误");
 	else openWedget();
 }
 
 void HX::on_Register_clicked()
 {
 	QSqlQuery query;
-	query.exec(QString("select * from %1 where Name='%2'").arg(table).arg(ui.username->text()));
-	if (query.size() != -1)QMessageBox::warning(this, "注册失败", QString("用户名已存在") + QString("select * from %1 where Name='%2'").arg(table).arg(ui.username->text()));
-	else
-	{
-		query.exec("insert into " + table + "(Name,Password) values('+" + ui.username->text() + "+','" + ui.password->text() + "')");
-		openWedget();
-	}
+	query.exec(QString("insert into %1 (Name,Password) values('%2','%3')").arg(table).arg(ui.username->text()).arg(ui.password->text()));
+	if (query.isActive())openWedget();
+	else QMessageBox::critical(this, "注册失败", "错误信息:" + query.lastError().text());
 }
 
 void HX::on_authority_currentIndexChanged(const QString& arg1)

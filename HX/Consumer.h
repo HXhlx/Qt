@@ -23,7 +23,6 @@ private:
 	QSqlTableModel* tableorder;
 	QItemSelectionModel* selectorder;
 	Ui::Consumer ui;
-	void opentable(QSqlTableModel*&, QTableView*, QString, QItemSelectionModel*&);
 	void Show();
 private slots:
 	void on_name_textEdited(const QString& arg);
