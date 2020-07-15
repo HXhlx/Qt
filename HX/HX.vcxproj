@@ -88,20 +88,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Consumer.cpp" />
-    <ClCompile Include="MySQL.cpp" />
+    <ClCompile Include="HX.cpp" />
+    <ClCompile Include="SqlTableModel.cpp" />
     <ClCompile Include="Worker.cpp" />
     <QtRcc Include="HX.qrc" />
     <QtUic Include="Administrator.ui" />
     <QtUic Include="Consumer.ui" />
-    <QtUic Include="HX.ui" />
-    <QtMoc Include="HX.h" />
     <ClCompile Include="Administrator.cpp" />
-    <ClCompile Include="HX.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="HX.ui" />
     <QtUic Include="Worker.ui" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Administrator.h" />
@@ -113,7 +109,10 @@
     <QtMoc Include="Consumer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MySQL.h" />
+    <QtMoc Include="HX.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="SqlTableModel.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

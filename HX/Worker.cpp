@@ -5,7 +5,7 @@ Worker::Worker(QWidget* parent, QString name, QString password)
 {
 	ui.setupUi(this);
 	QSqlQuery query;
-	query.exec(QString("select * from Worker where Name='%1' and Password='%2'").arg(name).arg(password));
+	query.exec(QString("select * from worker where Name='%1' and Password='%2'").arg(name).arg(password));
 	while (query.next())
 	{
 		WorkerID = query.value("WorkerID").toULongLong();
@@ -18,12 +18,33 @@ Worker::Worker(QWidget* parent, QString name, QString password)
 		phone = query.value("WorkPhone").toString();
 	}
 	Show();
-	HX::mysql->opentable(this, tableperformance, ui.performanceView, "performance", selectperformance, QString("WorkerID='%1'").arg(WorkerID));
-	HX::mysql->opentable(this, tableorder, ui.orderView, "order", selectorder, QString("WorkerID='%1'").arg(WorkerID));
+	opentable();
+	setCentralWidget(ui.tabWidget);
 }
 
 Worker::~Worker()
 {
+}
+
+void Worker::opentable()
+{
+	table = new QSqlRelationalTableModel(this, HX::Database);
+	table->setTable("order");
+	table->setEditStrategy(QSqlTableModel::OnFieldChange);
+	table->setFilter(QString("WorkerID='%1'").arg(WorkerID));
+	if (!(table->select()))
+	{
+		QMessageBox::critical(this, "错误", table->lastError().text());
+		return;
+	}
+	QStringList strs;
+	strs << "订单号" << "开始时间" << "完成时间" << "车牌号" << "商标" << "型号" << "账号" << "描述" << "工号" << "价格";
+	for (int i = 0; i < strs.count(); i++)table->setHeaderData(i, Qt::Horizontal, strs[i]);
+	select = new QItemSelectionModel(table);
+	ui.orderView->setModel(table);
+	ui.orderView->setSelectionModel(select);
+	ui.orderView->setColumnHidden(6, true);
+	ui.orderView->setColumnHidden(8, true);
 }
 
 void Worker::Show()
@@ -38,15 +59,6 @@ void Worker::Show()
 	else if (state == "维修中")ui.comboBox->setCurrentIndex(1);
 	ui.Save->setEnabled(false);
 	ui.Cancel->setEnabled(false);
-}
-
-void Worker::iniPieChart()
-{
-	
-}
-
-void Worker::buildPieChart()
-{
 }
 
 void Worker::on_name_textEdited(const QString& arg)
@@ -86,7 +98,7 @@ void Worker::on_Save_clicked()
 	time = ui.timeBox->value();
 	state = ui.comboBox->currentText();
 	QSqlQuery query;
-	query.exec(QString("update worker set Name='%1',WorkIDCard='%2',WorkAge='%3',Experience='%4',Statement='%5'").arg(Name).arg(ID).arg(age).arg(time).arg(state));
+	query.exec(QString("update worker set Name='%1',WorkIDCard='%2',WorkAge=%3,Experience=%4,Statement='%5' where WorkerID=%6").arg(Name).arg(ID).arg(age).arg(time).arg(state).arg(WorkerID));
 	if (!query.isActive())
 	{
 		QMessageBox::critical(this, "保存失败", query.lastError().text());
@@ -100,4 +112,38 @@ void Worker::on_Save_clicked()
 void Worker::on_Cancel_clicked()
 {
 	Show();
+}
+
+void Worker::on_Finish_clicked()
+{
+	QModelIndex index = select->currentIndex();
+	QSqlRecord record = table->record(index.row());
+	record.setValue(2, QDateTime::currentDateTime());
+	table->setRecord(index.row(), record);
+	state = "空闲中";
+	QSqlQuery query;
+	query.exec(QString("update worker set Statement='%1' where WorkerID=%2").arg(state).arg(WorkerID));
+}
+
+void Worker::on_orderCancel_clicked()
+{
+	QModelIndex index = select->currentIndex();
+	QSqlRecord record = table->record(index.row());
+	QSqlQuery query;
+	query.exec(QString("select WorkerID from worker where WorkerID!=%1 and Statement in ('空闲中') order by Experience limit 1").arg(WorkerID));
+	query.next();
+	record.setValue(8, query.value(0).toULongLong());
+	table->setRecord(index.row(), record);
+	table->removeRow(index.row());
+	time += 1;
+	state = "空闲中";
+	query.exec(QString("update worker set Statement='%1',Experience=%2 where WorkerID=%3").arg(state).arg(time).arg(WorkerID));
+}
+
+void Worker::on_orderView_clicked()
+{
+	QModelIndex index = select->currentIndex();
+	QSqlRecord record = table->record(index.row());
+	if (record.value(2).isNull())ui.Finish->setEnabled(true);
+	else ui.Finish->setEnabled(false);
 }

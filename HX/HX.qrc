@@ -1,4 +1,14 @@
 <RCC>
-    <qresource prefix="HX">
+    <qresource prefix="/HX">
+        <file>images/107.bmp</file>
+        <file>images/316.bmp</file>
+        <file>images/324.bmp</file>
+        <file>images/delete1.bmp</file>
+        <file>images/exit.bmp</file>
+        <file>images/save1.bmp</file>
+        <file>images/登录.jpg</file>
+        <file>images/管理员.jpg</file>
+        <file>images/客户.jpg</file>
+        <file>images/维修工.jpg</file>
     </qresource>
 </RCC>

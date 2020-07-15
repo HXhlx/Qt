@@ -1,25 +1,28 @@
 #pragma once
 #pragma execution_character_set("utf-8")
-#include <QtWidgets/QMainWindow>
+#include <QDialog>
 #include <QtSql>
 #include <QtWidgets>
-#include "MySQL.h"
-#include "ui_HX.h"
 #include "Administrator.h"
 #include "Consumer.h"
 #include "Worker.h"
-class HX : public QMainWindow
+#include "ui_HX.h"
+
+class HX : public QDialog
 {
 	Q_OBJECT
 public:
-	static MySQL* mysql;
-	HX(QWidget* parent = Q_NULLPTR);
+	static QSqlDatabase Database;
+	HX(QWidget *parent = Q_NULLPTR);
+	~HX();
 private:
 	QString table = "administrator";
-	Ui::HXClass ui;
+	Ui::HX ui;
 	void openWedget();
 private slots:
+	void on_authority_currentIndexChanged(const QString& arg1);
 	void on_Login_clicked();
 	void on_Register_clicked();
-	void on_authority_currentIndexChanged(const QString& arg1);
+	void on_username_textEdited();
+	void on_password_textEdited();
 };

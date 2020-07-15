@@ -1,10 +1,26 @@
 #include "HX.h"
+
+QSqlDatabase HX::Database = QSqlDatabase::addDatabase("QMYSQL");
+
 HX::HX(QWidget* parent)
-	: QMainWindow(parent)
+	: QDialog(parent)
 {
 	ui.setupUi(this);
 	ui.Register->setEnabled(false);
-	mysql = new MySQL(this, "dbo", "root", "hx19990627");
+	Database.setHostName("cdb-geebna1a.cd.tencentcdb.com");
+	Database.setUserName("HXhlx");
+	Database.setPassword("HXhlx19990627");
+	Database.setDatabaseName("fix_system");
+	Database.setPort(10053);
+	if (!Database.open())
+	{
+		QMessageBox::critical(parent, "´íÎó", Database.lastError().text());
+		return;
+	}
+}
+
+HX::~HX()
+{
 }
 
 void HX::openWedget()
@@ -39,16 +55,52 @@ void HX::on_Login_clicked()
 {
 	QSqlQuery query;
 	query.exec(QString("select * from %1 where Name='%2' and Password='%3'").arg(table).arg(ui.username->text()).arg(ui.password->text()));
-	if (query.size() == -1)QMessageBox::warning(this, "µÇÂ¼Ê§°Ü", "ÓÃ»§Ãû»òÃÜÂë´íÎó");
-	else openWedget();
+	if (query.size())
+	{
+		openWedget();
+		this->hide();
+	}
+	else QMessageBox::warning(this, "µÇÂ¼Ê§°Ü", "ÓÃ»§Ãû»òÃÜÂë´íÎó");
 }
 
 void HX::on_Register_clicked()
 {
 	QSqlQuery query;
 	query.exec(QString("insert into %1 (Name,Password) values('%2','%3')").arg(table).arg(ui.username->text()).arg(ui.password->text()));
-	if (query.isActive())openWedget();
-	else QMessageBox::critical(this, "×¢²áÊ§°Ü", "´íÎóÐÅÏ¢:" + query.lastError().text());
+	if (query.isActive())
+	{
+		openWedget();
+		this->hide();
+	}
+	else QMessageBox::critical(this, "×¢²áÊ§°Ü", "ÓÃ»§ÃûÒÑ´æÔÚ");
+}
+
+void HX::on_username_textEdited()
+{
+	if (ui.username->text() != "")
+	{
+		ui.Login->setEnabled(true);
+		if (ui.authority->currentText() == "¿Í»§")ui.Register->setEnabled(true);
+	}
+	else
+	{
+		ui.Login->setEnabled(false);
+		ui.Register->setEnabled(false);
+	}
+}
+
+void HX::on_password_textEdited()
+{
+	if (ui.password->text() != "")
+	{
+		ui.Login->setEnabled(true);
+		if (ui.authority->currentText() == "¿Í»§")ui.Register->setEnabled(true);
+	}
+	else
+	{
+		ui.Login->setEnabled(false);
+		ui.Register->setEnabled(false);
+	}
 }
 
 void HX::on_authority_currentIndexChanged(const QString& arg1)
