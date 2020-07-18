@@ -207,7 +207,6 @@ void Administrator::on_actExport_triggered()
 		if (file.open(QFile::WriteOnly | QIODevice::Text))
 		{
 			QTextStream ts(&file);
-			//ts.setCodec("GBK");//这个地方大家自己判断是否用“utf-8”
 			ts << textEdit.document()->toPlainText();
 			file.close();
 			QMessageBox::information(this, "导出", "数据导出成功!");
