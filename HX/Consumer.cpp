@@ -5,7 +5,7 @@ Consumer::Consumer(QWidget* parent, QString name, QString password)
 {
 	ui.setupUi(this);
 	QSqlQuery query;
-	query.exec(QString("select * from consumer where Name='%1' and Password='%2'").arg(name).arg(password));
+	query.exec(QString("select * from consumer where Name='%1' and Password=encode('%2','consumer')").arg(name).arg(password));
 	while (query.next())
 	{
 		CustomerID = query.value("CustomerID").toULongLong();

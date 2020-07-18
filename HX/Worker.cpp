@@ -5,7 +5,7 @@ Worker::Worker(QWidget* parent, QString name, QString password)
 {
 	ui.setupUi(this);
 	QSqlQuery query;
-	query.exec(QString("select * from worker where Name='%1' and Password='%2'").arg(name).arg(password));
+	query.exec(QString("select * from worker where Name='%1' and Password=encode('%2','worker')").arg(name).arg(password));
 	while (query.next())
 	{
 		WorkerID = query.value("WorkerID").toULongLong();

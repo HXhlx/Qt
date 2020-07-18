@@ -35,7 +35,7 @@ void Administrator::on_actInsert_triggered()
 	select->setCurrentIndex(index, QItemSelectionModel::Select);
 	if (table == tableworker)
 	{
-		table->setData(table->index(index.row(), 0), table->record(index.row() - 1).value(1).toULongLong() + 1);
+		table->setData(table->index(index.row(), 0), table->record(index.row() - 1).value(0).toULongLong() + 1);
 		table->setData(table->index(index.row(), 4), 0);
 		table->setData(table->index(index.row(), 5), 0);
 		table->setData(table->index(index.row(), 6), "¿ÕÏĞÖĞ");
@@ -281,6 +281,7 @@ void Administrator::on_tabWidget_currentChanged(int num)
 		ui.actDelete->setEnabled(false);
 		break;
 	case 3:
+		table = tableorder;
 		select = selectorder;
 		comselect->addItems(orders);
 		Strs = Orders;
