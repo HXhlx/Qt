@@ -27,7 +27,7 @@ void Consumer::opentable()
 {
 	table = new QSqlRelationalTableModel(this, HX::Database);
 	table->setTable("order");
-	table->setEditStrategy(QSqlTableModel::OnManualSubmit);
+	table->setEditStrategy(QSqlRelationalTableModel::OnManualSubmit);
 	table->setFilter(QString("CustomerID='%1'").arg(CustomerID));
 	if (!(table->select()))
 	{

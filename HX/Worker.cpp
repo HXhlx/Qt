@@ -30,7 +30,7 @@ void Worker::opentable()
 {
 	table = new QSqlRelationalTableModel(this, HX::Database);
 	table->setTable("order");
-	table->setEditStrategy(QSqlTableModel::OnFieldChange);
+	table->setEditStrategy(QSqlRelationalTableModel::OnFieldChange);
 	table->setFilter(QString("WorkerID='%1'").arg(WorkerID));
 	if (!(table->select()))
 	{

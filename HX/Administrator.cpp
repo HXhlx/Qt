@@ -100,23 +100,6 @@ void Administrator::buildWorkerChart()
 	chart->setAxisX(axisX, series);
 }
 
-void Administrator::opentable(QSqlRelationalTableModel*& table, QTableView* tableView, QString tablename, QItemSelectionModel*& select)
-{
-	table = new QSqlRelationalTableModel(this, HX::Database);
-	table->setTable(tablename);
-	table->setEditStrategy(QSqlTableModel::OnManualSubmit);
-	if (!(table->select()))
-	{
-		QMessageBox::critical(this, "错误", table->lastError().text());
-		return;
-	}
-	for (int i = 0; i < orders.count(); i++)table->setHeaderData(i, Qt::Horizontal, orders[i]);
-	select = new QItemSelectionModel(table);
-	connect(select, SIGNAL(currentChanged(QModelIndex, QModelIndex)), this, SLOT(on_currentChanged(QModelIndex, QModelIndex)));
-	tableView->setModel(table);
-	tableView->setSelectionModel(select);
-}
-
 void Administrator::buildCarChart()
 {
 	QChart* chart = ui.CarView->chart();
@@ -166,11 +149,11 @@ void Administrator::buildOrderChart()
 	chart->setAxisY(axisY, line);
 }
 
-void Administrator::opentable(QSqlTableModel*& table, QTableView* tableView, QString tablename, QItemSelectionModel*& select)
+void Administrator::opentable(QSqlRelationalTableModel*& table, QTableView* tableView, QString tablename, QItemSelectionModel*& select)
 {
-	table = new QSqlTableModel(this, HX::Database);
+	table = new QSqlRelationalTableModel(this, HX::Database);
 	table->setTable(tablename);
-	table->setEditStrategy(QSqlTableModel::OnManualSubmit);
+	table->setEditStrategy(QSqlRelationalTableModel::OnManualSubmit);
 	if (!(table->select()))
 	{
 		QMessageBox::critical(this, "错误", table->lastError().text());
@@ -181,6 +164,7 @@ void Administrator::opentable(QSqlTableModel*& table, QTableView* tableView, QSt
 	else if (tablename == "worker")strs = workers;
 	else if (tablename == "car")strs = cars;
 	else if (tablename == "consumer")strs = consumers;
+	else if (tablename == "order")strs = orders;
 	for (int i = 0; i < strs.count(); i++)table->setHeaderData(i, Qt::Horizontal, strs[i]);
 	select = new QItemSelectionModel(table);
 	connect(select, SIGNAL(currentChanged(QModelIndex, QModelIndex)), this, SLOT(on_currentChanged(QModelIndex, QModelIndex)));
@@ -195,6 +179,41 @@ void Administrator::on_actDelete_triggered()
 	table->removeRow(index.row());
 	ui.actSave->setEnabled(true);
 	ui.actCancel->setEnabled(true);
+}
+
+void Administrator::on_actExport_triggered()
+{
+	QString filepath = QFileDialog::getSaveFileName(this, "保存到...", "副本", "Excel 97-2003 工作簿(*.xls);;Excel 工作簿(*.xlsx)");
+	if (filepath != "")
+	{
+		int row = table->rowCount();
+		int col = table->columnCount();
+		QList<QString> list;
+		QString HeaderRow;
+		for (int i = 0; i < col; i++)HeaderRow.append(table->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString() + "\t");
+		list.push_back(HeaderRow);
+		for (int i = 0; i < row; i++)
+		{
+			QString rowStr = "";
+			for (int j = 0; j < col; j++) {
+				QModelIndex index = table->index(i, j);
+				rowStr += table->data(index).toString() + "\t";
+			}
+			list.push_back(rowStr);
+		}
+		QTextEdit textEdit;
+		for (int i = 0; i < list.size(); i++)textEdit.append(list.at(i));
+		QFile file(filepath);
+		if (file.open(QFile::WriteOnly | QIODevice::Text))
+		{
+			QTextStream ts(&file);
+			//ts.setCodec("GBK");//这个地方大家自己判断是否用“utf-8”
+			ts << textEdit.document()->toPlainText();
+			file.close();
+			QMessageBox::information(this, "导出", "数据导出成功!");
+		}
+		else QMessageBox::information(this, "导出", "文件打开错误,数据导出失败!");
+	}
 }
 
 void Administrator::on_actSave_triggered()

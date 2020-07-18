@@ -19,12 +19,12 @@ private:
 	QItemSelectionModel* selectorder;
 	QItemSelectionModel* selectworker;
 	QLineEdit* edit;
+	QSqlRelationalTableModel* table;
+	QSqlRelationalTableModel* tableadmin;
+	QSqlRelationalTableModel* tablecar;
+	QSqlRelationalTableModel* tableconsumer;
 	QSqlRelationalTableModel* tableorder;
-	QSqlTableModel* tableconsumer;
-	QSqlTableModel* table;
-	QSqlTableModel* tableadmin;
-	QSqlTableModel* tablecar;
-	QSqlTableModel* tableworker;
+	QSqlRelationalTableModel* tableworker;
 	QStringList admins = { "用户名" , "密码" };
 	QStringList Admins = { "Name","Password" };
 	QStringList cars = { "商标" , "型号" , "类型" , "价格" };
@@ -44,11 +44,11 @@ private:
 	void buildOrderChart();
 	void buildWorkerChart();
 	void opentable(QSqlRelationalTableModel*&, QTableView*, QString, QItemSelectionModel*&);
-	void opentable(QSqlTableModel*&, QTableView*, QString, QItemSelectionModel*&);
 private slots:
 	void on_actCancel_triggered();
 	void on_actInsert_triggered();
 	void on_actDelete_triggered();
+	void on_actExport_triggered();
 	void on_actSave_triggered();
 	void on_actSelect_triggered();
 	void on_currentChanged(const QModelIndex& current, const QModelIndex& previous);
