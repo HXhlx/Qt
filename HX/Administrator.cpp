@@ -11,6 +11,13 @@ Administrator::Administrator(QWidget* parent)
 	opentable(tablecar, ui.carView, "car", selectcar);
 	table = tableadmin;
 	select = selectadmin;
+	comselect = new QComboBox;
+	comselect->addItems(admins);
+	ui.mainToolBar->addWidget(comselect);
+	edit = new QLineEdit;
+	edit->setMaximumWidth(100);
+	ui.mainToolBar->addWidget(edit);
+	Strs = Admins;
 	iniCarChart();
 	iniWorkerChart();
 	iniOrderChart();
@@ -22,13 +29,13 @@ Administrator::~Administrator()
 
 void Administrator::on_actInsert_triggered()
 {
-	table->insertRow(qtable->rowCount(), QModelIndex());
-	QModelIndex index = table->index(table->rowCount() - 1, 0);
+	table->insertRow(table->rowCount(), QModelIndex());
+	QModelIndex index = table->index(table->rowCount() - 1, 1);
 	select->clearSelection();
 	select->setCurrentIndex(index, QItemSelectionModel::Select);
-	if (qtable == tableworker)
+	if (table == tableworker)
 	{
-		table->setData(table->index(index.row(), 0), table->record(index.row() - 1).value(0).toULongLong() + 1);
+		table->setData(table->index(index.row(), 0), table->record(index.row() - 1).value(1).toULongLong() + 1);
 		table->setData(table->index(index.row(), 4), 0);
 		table->setData(table->index(index.row(), 5), 0);
 		table->setData(table->index(index.row(), 6), "空闲中");
@@ -103,9 +110,7 @@ void Administrator::opentable(QSqlRelationalTableModel*& table, QTableView* tabl
 		QMessageBox::critical(this, "错误", table->lastError().text());
 		return;
 	}
-	QStringList strs;
-	strs << "订单号" << "开始时间" << "完成时间" << "车牌号" << "商标" << "型号" << "账号" << "描述" << "工号" << "价格";
-	for (int i = 0; i < strs.count(); i++)table->setHeaderData(i, Qt::Horizontal, strs[i]);
+	for (int i = 0; i < orders.count(); i++)table->setHeaderData(i, Qt::Horizontal, orders[i]);
 	select = new QItemSelectionModel(table);
 	connect(select, SIGNAL(currentChanged(QModelIndex, QModelIndex)), this, SLOT(on_currentChanged(QModelIndex, QModelIndex)));
 	tableView->setModel(table);
@@ -172,35 +177,16 @@ void Administrator::opentable(QSqlTableModel*& table, QTableView* tableView, QSt
 		return;
 	}
 	QStringList strs;
-	if (tablename == "consumer")strs << "账号" << "用户名" << "身份证号" << "电话号码" << "密码";
-	else if (tablename == "car")strs << "商标" << "型号" << "类型" << "价格";
+	if (tablename == "administrator")strs = admins;
+	else if (tablename == "worker")strs = workers;
+	else if (tablename == "car")strs = cars;
+	else if (tablename == "consumer")strs = consumers;
 	for (int i = 0; i < strs.count(); i++)table->setHeaderData(i, Qt::Horizontal, strs[i]);
 	select = new QItemSelectionModel(table);
 	connect(select, SIGNAL(currentChanged(QModelIndex, QModelIndex)), this, SLOT(on_currentChanged(QModelIndex, QModelIndex)));
 	tableView->setModel(table);
 	tableView->setSelectionModel(select);
-	if (tablename == "consumer")tableView->setColumnHidden(table->fieldIndex("Password"), true);
-}
-
-void Administrator::opentable(SqlTableModel*& table, QTableView* tableView, QString tablename, QItemSelectionModel*& select)
-{
-	table = new SqlTableModel(this, HX::Database);
-	table->setTable(tablename);
-	table->setEditStrategy(QSqlTableModel::OnManualSubmit);
-	if (!(table->select()))
-	{
-		QMessageBox::critical(this, "错误", table->lastError().text());
-		return;
-	}
-	QStringList strs;
-	if (tablename == "administrator")strs << "选择" << "用户名" << "密码";
-	else if (tablename == "worker")strs << "选择" << "工号" << "姓名" << "身份证号" << "电话号码" << "工龄" << "业绩" << "状态" << "密码";
-	for (int i = 0; i < strs.count(); i++)table->setHeaderData(i, Qt::Horizontal, strs[i]);
-	select = new QItemSelectionModel(table);
-	connect(select, SIGNAL(currentChanged(QModelIndex, QModelIndex)), this, SLOT(on_currentChanged(QModelIndex, QModelIndex)));
-	tableView->setModel(table);
-	tableView->setSelectionModel(select);
-	if (tablename == "worker")tableView->setColumnHidden(table->fieldIndex("Password"), true);
+	if (tablename == "worker" || tablename == "consumer")tableView->setColumnHidden(table->fieldIndex("Password"), true);
 }
 
 void Administrator::on_actDelete_triggered()
@@ -215,7 +201,10 @@ void Administrator::on_actSave_triggered()
 {
 	uint row = tableworker->rowCount() - 1;
 	tableworker->setData(tableworker->index(row, 7), tableworker->record(row).value(2).toString());
-	if (!qtable->submitAll())QMessageBox::critical(this, "保存失败!", "错误信息:" + qtable->lastError().text());
+	QSqlQuery query;
+	QStringList strs = { "administrator","worker","car" };
+	for (QString str : strs)query.exec(QString("update %1 set checked = 0 where checked = 1").arg(str));
+	if (!table->submitAll() && !query.isActive())QMessageBox::critical(this, "保存失败!", "错误信息:" + table->lastError().text());
 	else
 	{
 		ui.actSave->setEnabled(false);
@@ -223,9 +212,14 @@ void Administrator::on_actSave_triggered()
 	}
 }
 
+void Administrator::on_actSelect_triggered()
+{
+	table->setFilter(QString("%1 like '%%2%'").arg(Strs[comselect->currentIndex()]).arg(edit->text()));
+}
+
 void Administrator::on_actCancel_triggered()
 {
-	qtable->revertAll();
+	table->revertAll();
 	ui.actSave->setEnabled(false);
 	ui.actCancel->setEnabled(false);
 }
@@ -234,48 +228,53 @@ void Administrator::on_currentChanged(const QModelIndex& current, const QModelIn
 {
 	Q_UNUSED(current);
 	Q_UNUSED(previous);
-	ui.actSave->setEnabled(qtable->isDirty());
-	ui.actCancel->setEnabled(qtable->isDirty());
-}
-
-void Administrator::on_PieSliceHighlight(bool show)
-{
-	QPieSlice* slice = (QPieSlice*)sender();
-	slice->setExploded(show);
+	ui.actSave->setEnabled(table->isDirty());
+	ui.actCancel->setEnabled(table->isDirty());
 }
 
 void Administrator::on_tabWidget_currentChanged(int num)
 {
+	comselect->clear();
 	switch (num)
 	{
 	case 0:
 		table = tableadmin;
 		select = selectadmin;
+		comselect->addItems(admins);
+		Strs = Admins;
 		ui.actInsert->setEnabled(true);
 		ui.actDelete->setEnabled(true);
 		break;
 	case 1:
 		table = tableworker;
 		select = selectworker;
+		Strs = Workers;
+		comselect->addItems(workers);
 		ui.actInsert->setEnabled(true);
 		ui.actDelete->setEnabled(true);
 		buildWorkerChart();
 		break;
 	case 2:
-		qtable = tableconsumer;
+		table = tableconsumer;
 		select = selectconsumer;
+		comselect->addItems(consumers);
+		Strs = Consumers;
 		ui.actInsert->setEnabled(false);
 		ui.actDelete->setEnabled(false);
 		break;
 	case 3:
 		select = selectorder;
+		comselect->addItems(orders);
+		Strs = Orders;
 		ui.actInsert->setEnabled(false);
 		ui.actDelete->setEnabled(false);
 		buildOrderChart();
 		break;
 	case 4:
-		qtable = tablecar;
+		table = tablecar;
 		select = selectcar;
+		comselect->addItems(cars);
+		Strs = Cars;
 		ui.actInsert->setEnabled(true);
 		ui.actDelete->setEnabled(true);
 		buildCarChart();

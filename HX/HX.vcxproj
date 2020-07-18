@@ -89,7 +89,6 @@
   <ItemGroup>
     <ClCompile Include="Consumer.cpp" />
     <ClCompile Include="HX.cpp" />
-    <ClCompile Include="SqlTableModel.cpp" />
     <ClCompile Include="Worker.cpp" />
     <QtRcc Include="HX.qrc" />
     <QtUic Include="Administrator.ui" />
@@ -110,9 +109,6 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="HX.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="SqlTableModel.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

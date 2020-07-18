@@ -32,9 +32,12 @@ border-image:url(:/HX/images/登录.jpg)
 }
 
 .QLineEdit, .QComboBox {
-    background-color: rgb(200, 200, 200, 50%);
-    border-radius: 10%;
+    background-color: rgba(200, 200, 200, 50%);
     height: 30px;
+}
+
+.QLabel{
+	color: purple;
 }</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">

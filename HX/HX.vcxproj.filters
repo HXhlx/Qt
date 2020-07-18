@@ -44,9 +44,6 @@
     <ClCompile Include="HX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SqlTableModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Administrator.h">
@@ -59,9 +56,6 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="HX.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="SqlTableModel.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

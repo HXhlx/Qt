@@ -54,7 +54,8 @@ void HX::openWedget()
 void HX::on_Login_clicked()
 {
 	QSqlQuery query;
-	query.exec(QString("select * from %1 where Name='%2' and Password='%3'").arg(table).arg(ui.username->text()).arg(ui.password->text()));
+	QStringList strs = { "admin","worker","consumer" };
+	query.exec(QString("select * from %1 where Name='%2' and Password=encode('%3','%4')").arg(table).arg(ui.username->text()).arg(ui.password->text()).arg(strs[ui.authority->currentIndex()]));
 	if (query.size())
 	{
 		openWedget();
