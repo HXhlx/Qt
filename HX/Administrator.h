@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 #include <QMainWindow>
 #include <QtCharts>
 #include <QtSql>
 #include "HX.h"
 #include "ui_Administrator.h"
-using namespace QtCharts;
+
 class Administrator : public QMainWindow
 {
 	Q_OBJECT
@@ -25,16 +25,16 @@ private:
 	QSqlRelationalTableModel* tableconsumer;
 	QSqlRelationalTableModel* tableorder;
 	QSqlRelationalTableModel* tableworker;
-	QStringList admins = { "ÓÃ»§Ãû" , "ÃÜÂë" };
+	QStringList admins = { "ç”¨æˆ·å" , "å¯†ç " };
 	QStringList Admins = { "Name","Password" };
-	QStringList cars = { "ÉÌ±ê" , "ĞÍºÅ" , "ÀàĞÍ" , "¼Û¸ñ" };
+	QStringList cars = { "å•†æ ‡" , "å‹å·" , "ç±»å‹" , "ä»·æ ¼" };
 	QStringList Cars = { "Brand","Model","Type","Price" };
-	QStringList consumers = { "ÕËºÅ" , "ÓÃ»§Ãû" , "Éí·İÖ¤ºÅ" , "µç»°ºÅÂë" , "ÃÜÂë" };
+	QStringList consumers = { "è´¦å·" , "ç”¨æˆ·å" , "èº«ä»½è¯å·" , "ç”µè¯å·ç " , "å¯†ç " };
 	QStringList Consumers = { "CustomerID","Name","ID","CustomerPhone","Password" };
-	QStringList orders = { "¶©µ¥ºÅ","¿ªÊ¼Ê±¼ä","Íê³ÉÊ±¼ä","³µÅÆºÅ","ÉÌ±ê","ĞÍºÅ","ÕËºÅ","ÃèÊö","¹¤ºÅ","¼Û¸ñ" };
+	QStringList orders = { "è®¢å•å·","å¼€å§‹æ—¶é—´","å®Œæˆæ—¶é—´","è½¦ç‰Œå·","å•†æ ‡","å‹å·","è´¦å·","æè¿°","å·¥å·","ä»·æ ¼" };
 	QStringList Orders = { "OrderID","LDate","EDate","CarID","Brand","Model","CustomerID","WorkerID","Pay" };
 	QStringList Strs;
-	QStringList workers = { "¹¤ºÅ" , "ĞÕÃû" , "Éí·İÖ¤ºÅ" , "µç»°ºÅÂë" , "¹¤Áä" , "Òµ¼¨" , "×´Ì¬" , "ÃÜÂë" };
+	QStringList workers = { "å·¥å·" , "å§“å" , "èº«ä»½è¯å·" , "ç”µè¯å·ç " , "å·¥é¾„" , "ä¸šç»©" , "çŠ¶æ€" , "å¯†ç " };
 	QStringList Workers = { "WorkerID","Name","WorkIDCard","WorkPhone","WorkAge","Experience","Statement","Password" };
 	Ui::Administrator ui;
 	void iniCarChart();

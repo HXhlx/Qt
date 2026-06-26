@@ -1,22 +1,40 @@
-#include "Worker.h"
+ï»¿#include "Worker.h"
+#include "DatabaseManager.h"
+#include "CryptoHelper.h"
 
 Worker::Worker(QWidget* parent, QString name, QString password)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
-	QSqlQuery query;
-	query.exec(QString("select * from worker where Name='%1' and Password=encode('%2','worker')").arg(name).arg(password));
-	while (query.next())
+	
+	// ä½¿ç”¨å‚æ•°åŒ–æŸ¥è¯¢éªŒè¯ç™»å½•
+	QSqlQuery query = DatabaseManager::instance().createQuery();
+	QString sql = "SELECT * FROM worker WHERE Name = :name";
+	QVariantMap params;
+	params[":name"] = name;
+	
+	if (DatabaseManager::instance().executeQuery(query, sql, params))
 	{
-		WorkerID = query.value("WorkerID").toULongLong();
-		Name = name;
-		Password = password;
-		ID = query.value("WorkIDCard").toString();
-		age = query.value("WorkAge").toUInt();
-		time = query.value("Experience").toULongLong();
-		state = query.value("Statement").toString();
-		phone = query.value("WorkPhone").toString();
+		while (query.next())
+		{
+			QString storedHash = query.value("Password").toString();
+			QString salt = query.value("Salt").toString();
+			
+			// éªŒè¯å¯†ç 
+			if (CryptoHelper::verifyPassword(password, storedHash, salt))
+			{
+				WorkerID = query.value("WorkerID").toULongLong();
+				Name = name;
+				Password = password;
+				ID = query.value("WorkIDCard").toString();
+				age = query.value("WorkAge").toUInt();
+				time = query.value("Experience").toULongLong();
+				state = query.value("Statement").toString();
+				phone = query.value("WorkPhone").toString();
+			}
+		}
 	}
+	
 	Show();
 	opentable();
 	setCentralWidget(ui.tabWidget);
@@ -28,17 +46,17 @@ Worker::~Worker()
 
 void Worker::opentable()
 {
-	table = new QSqlRelationalTableModel(this, HX::Database);
+	table = new QSqlRelationalTableModel(this, DatabaseManager::instance().database());
 	table->setTable("order");
 	table->setEditStrategy(QSqlRelationalTableModel::OnFieldChange);
 	table->setFilter(QString("WorkerID='%1'").arg(WorkerID));
 	if (!(table->select()))
 	{
-		QMessageBox::critical(this, "´íÎó", table->lastError().text());
+		QMessageBox::critical(this, "é”™è¯¯", table->lastError().text());
 		return;
 	}
 	QStringList strs;
-	strs << "¶©µ¥ºÅ" << "¿ªÊ¼Ê±¼ä" << "Íê³ÉÊ±¼ä" << "³µÅÆºÅ" << "ÉÌ±ê" << "ĞÍºÅ" << "ÕËºÅ" << "ÃèÊö" << "¹¤ºÅ" << "¼Û¸ñ";
+	strs << "è®¢å•å·" << "å¼€å§‹æ—¶é—´" << "å®Œæˆæ—¶é—´" << "è½¦ç‰Œå·" << "å•†æ ‡" << "å‹å·" << "è´¦å·" << "æè¿°" << "å·¥å·" << "ä»·æ ¼";
 	for (int i = 0; i < strs.count(); i++)table->setHeaderData(i, Qt::Horizontal, strs[i]);
 	select = new QItemSelectionModel(table);
 	ui.orderView->setModel(table);
@@ -55,8 +73,8 @@ void Worker::Show()
 	ui.ID->setText(ID);
 	ui.timeBox->setValue(time);
 	ui.WorkerID->setText(QString::number(WorkerID));
-	if (state == "¿ÕÏĞÖĞ")ui.comboBox->setCurrentIndex(0);
-	else if (state == "Î¬ĞŞÖĞ")ui.comboBox->setCurrentIndex(1);
+	if (state == "ç©ºé—²ä¸­")ui.comboBox->setCurrentIndex(0);
+	else if (state == "ç»´ä¿®ä¸­")ui.comboBox->setCurrentIndex(1);
 	ui.Save->setEnabled(false);
 	ui.Cancel->setEnabled(false);
 }
@@ -97,14 +115,25 @@ void Worker::on_Save_clicked()
 	ID = ui.ID->text();
 	time = ui.timeBox->value();
 	state = ui.comboBox->currentText();
-	QSqlQuery query;
-	query.exec(QString("update worker set Name='%1',WorkIDCard='%2',WorkAge=%3,Experience=%4,Statement='%5' where WorkerID=%6").arg(Name).arg(ID).arg(age).arg(time).arg(state).arg(WorkerID));
-	if (!query.isActive())
+	
+	// ä½¿ç”¨å‚æ•°åŒ–æŸ¥è¯¢
+	QSqlQuery query = DatabaseManager::instance().createQuery();
+	QString sql = "UPDATE worker SET Name = :name, WorkIDCard = :id, WorkAge = :age, "
+	              "Experience = :exp, Statement = :state WHERE WorkerID = :wid";
+	QVariantMap params;
+	params[":name"] = Name;
+	params[":id"] = ID;
+	params[":age"] = age;
+	params[":exp"] = static_cast<quint64>(time);
+	params[":state"] = state;
+	params[":wid"] = WorkerID;
+	
+	if (!DatabaseManager::instance().executeQuery(query, sql, params))
 	{
-		QMessageBox::critical(this, "±£´æÊ§°Ü", query.lastError().text());
+		QMessageBox::critical(this, "ä¿å­˜å¤±è´¥", DatabaseManager::instance().lastError());
 		return;
 	}
-	QMessageBox::information(this, "±£´æ", "±£´æ³É¹¦!");
+	QMessageBox::information(this, "ä¿å­˜", "ä¿å­˜æˆåŠŸ!");
 	ui.Save->setEnabled(false);
 	ui.Cancel->setEnabled(false);
 }
@@ -120,24 +149,47 @@ void Worker::on_Finish_clicked()
 	QSqlRecord record = table->record(index.row());
 	record.setValue(2, QDateTime::currentDateTime());
 	table->setRecord(index.row(), record);
-	state = "¿ÕÏĞÖĞ";
-	QSqlQuery query;
-	query.exec(QString("update worker set Statement='%1' where WorkerID=%2").arg(state).arg(WorkerID));
+	state = "ç©ºé—²ä¸­";
+	
+	// ä½¿ç”¨å‚æ•°åŒ–æŸ¥è¯¢
+	QSqlQuery query = DatabaseManager::instance().createQuery();
+	QString sql = "UPDATE worker SET Statement = :state WHERE WorkerID = :wid";
+	QVariantMap params;
+	params[":state"] = state;
+	params[":wid"] = WorkerID;
+	DatabaseManager::instance().executeQuery(query, sql, params);
 }
 
 void Worker::on_orderCancel_clicked()
 {
 	QModelIndex index = select->currentIndex();
 	QSqlRecord record = table->record(index.row());
-	QSqlQuery query;
-	query.exec(QString("select WorkerID from worker where WorkerID!=%1 and Statement in ('¿ÕÏĞÖĞ') order by Experience limit 1").arg(WorkerID));
-	query.next();
-	record.setValue(8, query.value(0).toULongLong());
+	
+	// ä½¿ç”¨å‚æ•°åŒ–æŸ¥è¯¢æŸ¥æ‰¾å…¶ä»–ç©ºé—²å‘˜å·¥
+	QSqlQuery query = DatabaseManager::instance().createQuery();
+	QString sql = "SELECT WorkerID FROM worker WHERE WorkerID != :wid AND Statement = 'ç©ºé—²ä¸­' "
+	              "ORDER BY Experience LIMIT 1";
+	QVariantMap params;
+	params[":wid"] = WorkerID;
+	
+	if (DatabaseManager::instance().executeQuery(query, sql, params))
+	{
+		query.next();
+		record.setValue(8, query.value(0).toULongLong());
+	}
+	
 	table->setRecord(index.row(), record);
 	table->removeRow(index.row());
 	time += 1;
-	state = "¿ÕÏĞÖĞ";
-	query.exec(QString("update worker set Statement='%1',Experience=%2 where WorkerID=%3").arg(state).arg(time).arg(WorkerID));
+	state = "ç©ºé—²ä¸­";
+	
+	// æ›´æ–°å‘˜å·¥çŠ¶æ€
+	sql = "UPDATE worker SET Statement = :state, Experience = :exp WHERE WorkerID = :wid";
+	params.clear();
+	params[":state"] = state;
+	params[":exp"] = static_cast<quint64>(time);
+	params[":wid"] = WorkerID;
+	DatabaseManager::instance().executeQuery(query, sql, params);
 }
 
 void Worker::on_orderView_clicked()

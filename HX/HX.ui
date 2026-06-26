@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>HX</class>
  <widget class="QDialog" name="HX">
@@ -13,9 +13,9 @@
   <property name="windowTitle">
    <string>HX</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true">#HX{
-border-image:url(:/HX/images/登录.jpg)
+   <property name="styleSheet">
+    <string notr="true">#HX{
+border-image:url(:/HX/images/login.jpg)
 }
 
 .QGroupBox {
@@ -106,30 +106,30 @@ border-image:url(:/HX/images/登录.jpg)
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QPushButton" name="Login">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>登录</string>
-        </property>
-       </widget>
+        <widget class="QPushButton" name="Login">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>登录</string>
+         </property>
+        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="Register">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>注册</string>
-        </property>
-       </widget>
+        <widget class="QPushButton" name="Register">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>注册</string>
+         </property>
+        </widget>
       </item>
      </layout>
     </widget>
@@ -152,57 +152,57 @@ border-image:url(:/HX/images/登录.jpg)
       <bool>false</bool>
      </property>
      <layout class="QFormLayout" name="formLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="font">
-         <font>
-          <family>华文行楷</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>登录设置</string>
-        </property>
-       </widget>
-      </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="font">
+          <font>
+           <family>华文行楷</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>登录设置</string>
+         </property>
+        </widget>
+       </item>
       <item row="0" column="1">
-       <widget class="QComboBox" name="authority">
-        <property name="autoFillBackground">
-         <bool>false</bool>
-        </property>
-        <item>
-         <property name="text">
-          <string>管理员</string>
+        <widget class="QComboBox" name="authority">
+         <property name="autoFillBackground">
+          <bool>false</bool>
          </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>员工</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>客户</string>
-         </property>
-        </item>
-       </widget>
+         <item>
+          <property name="text">
+           <string>管理员</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>员工</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>客户</string>
+          </property>
+         </item>
+        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="font">
-         <font>
-          <family>华文行楷</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>用  户  名</string>
-        </property>
-       </widget>
-      </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="font">
+          <font>
+           <family>华文行楷</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>用  户  名</string>
+         </property>
+        </widget>
+       </item>
       <item row="1" column="1">
        <widget class="QLineEdit" name="username">
         <property name="autoFillBackground">
@@ -210,19 +210,19 @@ border-image:url(:/HX/images/登录.jpg)
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="font">
-         <font>
-          <family>华文行楷</family>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>密        码</string>
-        </property>
-       </widget>
-      </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="font">
+          <font>
+           <family>华文行楷</family>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>密        码</string>
+         </property>
+        </widget>
+       </item>
       <item row="2" column="1">
        <widget class="QLineEdit" name="password">
         <property name="autoFillBackground">

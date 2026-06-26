@@ -1,5 +1,4 @@
-#pragma once
-#pragma execution_character_set("utf-8")
+﻿#pragma once
 #include <QDialog>
 #include <QtSql>
 #include <QtWidgets>
@@ -12,7 +11,6 @@ class HX : public QDialog
 {
 	Q_OBJECT
 public:
-	static QSqlDatabase Database;
 	HX(QWidget *parent = Q_NULLPTR);
 	~HX();
 private:

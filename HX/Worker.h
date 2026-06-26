@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 #include <QMainWindow>
 #include <QtCharts>
 #include <QtSql>
 #include "HX.h"
 #include "ui_Worker.h"
-using namespace QtCharts;
+
 class Worker : public QMainWindow
 {
 	Q_OBJECT
@@ -22,7 +22,7 @@ private:
 	Ui::Worker ui;
 	uint age;
 	ulong time;
-	ULONGLONG WorkerID;
+	quint64 WorkerID;
 	void opentable();
 	void Show();
 private slots:

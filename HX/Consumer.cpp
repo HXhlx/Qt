@@ -1,19 +1,37 @@
-#include "Consumer.h"
+ï»¿#include "Consumer.h"
+#include "DatabaseManager.h"
+#include "CryptoHelper.h"
 
 Consumer::Consumer(QWidget* parent, QString name, QString password)
 	: QMainWindow(parent)
 {
 	ui.setupUi(this);
-	QSqlQuery query;
-	query.exec(QString("select * from consumer where Name='%1' and Password=encode('%2','consumer')").arg(name).arg(password));
-	while (query.next())
+	
+	// ä½¿ç”¨å‚æ•°åŒ–æŸ¥è¯¢éªŒè¯ç™»å½•
+	QSqlQuery query = DatabaseManager::instance().createQuery();
+	QString sql = "SELECT * FROM consumer WHERE Name = :name";
+	QVariantMap params;
+	params[":name"] = name;
+	
+	if (DatabaseManager::instance().executeQuery(query, sql, params))
 	{
-		CustomerID = query.value("CustomerID").toULongLong();
-		Name = name;
-		Password = password;
-		Phone = query.value("CustomerPhone").toString();
-		ID = query.value("ID").toString();
+		while (query.next())
+		{
+			QString storedHash = query.value("Password").toString();
+			QString salt = query.value("Salt").toString();
+			
+			// éªŒè¯å¯†ç 
+			if (CryptoHelper::verifyPassword(password, storedHash, salt))
+			{
+				CustomerID = query.value("CustomerID").toULongLong();
+				Name = name;
+				Password = password;
+				Phone = query.value("CustomerPhone").toString();
+				ID = query.value("ID").toString();
+			}
+		}
 	}
+	
 	Show();
 	opentable();
 	setCentralWidget(ui.tabWidget);
@@ -25,17 +43,17 @@ Consumer::~Consumer()
 
 void Consumer::opentable()
 {
-	table = new QSqlRelationalTableModel(this, HX::Database);
+	table = new QSqlRelationalTableModel(this, DatabaseManager::instance().database());
 	table->setTable("order");
 	table->setEditStrategy(QSqlRelationalTableModel::OnManualSubmit);
 	table->setFilter(QString("CustomerID='%1'").arg(CustomerID));
 	if (!(table->select()))
 	{
-		QMessageBox::critical(this, "´íÎó", table->lastError().text());
+		QMessageBox::critical(this, "é”™è¯¯", table->lastError().text());
 		return;
 	}
 	QStringList strs;
-	strs << "¶©µ¥ºÅ" << "¿ªÊ¼Ê±¼ä" << "Íê³ÉÊ±¼ä" << "³µÅÆºÅ" << "ÉÌ±ê" << "ÐÍºÅ" << "ÕËºÅ" << "ÃèÊö" << "¹¤ºÅ" << "¼Û¸ñ";
+	strs << "è®¢å•å·" << "å¼€å§‹æ—¶é—´" << "å®Œæˆæ—¶é—´" << "è½¦ç‰Œå·" << "å•†æ ‡" << "åž‹å·" << "è´¦å·" << "æè¿°" << "å·¥å·" << "ä»·æ ¼";
 	for (int i = 0; i < strs.count(); i++)table->setHeaderData(i, Qt::Horizontal, strs[i]);
 	select = new QItemSelectionModel(table);
 	ui.orderView->setModel(table);
@@ -74,7 +92,7 @@ void Consumer::on_name_textEdited(const QString& arg)
 }
 void Consumer::on_orderSave_clicked()
 {
-	if (!table->submitAll())QMessageBox::critical(this, "±£´æÊ§°Ü!", "´íÎóÐÅÏ¢:" + table->lastError().text());
+	if (!table->submitAll())QMessageBox::critical(this, "ä¿å­˜å¤±è´¥!", "é”™è¯¯ä¿¡æ¯:" + table->lastError().text());
 	else
 	{
 		ui.orderSave->setEnabled(false);
@@ -100,14 +118,23 @@ void Consumer::on_Save_clicked()
 	Name = ui.name->text();
 	Phone = ui.phone->text();
 	ID = ui.ID->text();
-	QSqlQuery query;
-	query.exec(QString("update consumer set Name='%1',CustomerPhone='%2',ID='%3' where CustomerID=%4").arg(Name).arg(Phone).arg(ID).arg(CustomerID));
-	if (!query.isActive())
+	
+	// ä½¿ç”¨å‚æ•°åŒ–æŸ¥è¯¢
+	QSqlQuery query = DatabaseManager::instance().createQuery();
+	QString sql = "UPDATE consumer SET Name = :name, CustomerPhone = :phone, ID = :id "
+	              "WHERE CustomerID = :cid";
+	QVariantMap params;
+	params[":name"] = Name;
+	params[":phone"] = Phone;
+	params[":id"] = ID;
+	params[":cid"] = CustomerID;
+	
+	if (!DatabaseManager::instance().executeQuery(query, sql, params))
 	{
-		QMessageBox::critical(this, "±£´æÊ§°Ü", query.lastError().text());
+		QMessageBox::critical(this, "ä¿å­˜å¤±è´¥", DatabaseManager::instance().lastError());
 		return;
 	}
-	QMessageBox::information(this, "±£´æ", "±£´æ³É¹¦!");
+	QMessageBox::information(this, "ä¿å­˜", "ä¿å­˜æˆåŠŸ!");
 	ui.Save->setEnabled(false);
 	ui.Cancel->setEnabled(false);
 }
@@ -124,20 +151,41 @@ void Consumer::on_Insert_clicked()
 	select->clearSelection();
 	select->setCurrentIndex(index, QItemSelectionModel::Select);
 	QDateTime datetime = QDateTime::currentDateTime();
-	QSqlQuery query;
-	query.exec(QString("select OrderID from `order` where LDate='%1' order by OrderID limit 1").arg(datetime.toString("yyyy-MM-dd hh:mm:ss")));
-	query.next();
-	table->setData(table->index(index.row(), 0), datetime.toString("yyyyMMddhhmmss").toULongLong() * 10000 + query.value(0).toULongLong() + 1);
+	
+	// ä½¿ç”¨å‚æ•°åŒ–æŸ¥è¯¢èŽ·å–è®¢å•ID
+	QSqlQuery query = DatabaseManager::instance().createQuery();
+	QString sql = "SELECT OrderID FROM `order` WHERE LDate = :date ORDER BY OrderID LIMIT 1";
+	QVariantMap params;
+	params[":date"] = datetime.toString("yyyy-MM-dd hh:mm:ss");
+	
+	if (DatabaseManager::instance().executeQuery(query, sql, params))
+	{
+		query.next();
+		table->setData(table->index(index.row(), 0), 
+			datetime.toString("yyyyMMddhhmmss").toULongLong() * 10000 + query.value(0).toULongLong() + 1);
+	}
+	
 	table->setData(table->index(index.row(), 1), datetime);
-	query.exec(QString("select WorkerID from worker where Statement in ('¿ÕÏÐÖÐ') order by Experience limit 1").arg(datetime.toString("yyyy-MM-dd hh:mm:ss")));
-	query.next();
-	table->setData(table->index(index.row(), 8), query.value(0).toULongLong());
+	
+	// ä½¿ç”¨å‚æ•°åŒ–æŸ¥è¯¢æŸ¥æ‰¾ç©ºé—²å‘˜å·¥
+	sql = "SELECT WorkerID FROM worker WHERE Statement = 'ç©ºé—²ä¸­' ORDER BY Experience LIMIT 1";
+	params.clear();
+	
+	if (DatabaseManager::instance().executeQuery(query, sql, params))
+	{
+		query.next();
+		table->setData(table->index(index.row(), 8), query.value(0).toULongLong());
+	}
 }
 
 void Consumer::on_Logout_clicked()
 {
-	QSqlQuery query;
-	query.exec("delete * from consumer where CustomerID=" + CustomerID);
+	// ä½¿ç”¨å‚æ•°åŒ–æŸ¥è¯¢åˆ é™¤å®¢æˆ·
+	QSqlQuery query = DatabaseManager::instance().createQuery();
+	QString sql = "DELETE FROM consumer WHERE CustomerID = :cid";
+	QVariantMap params;
+	params[":cid"] = CustomerID;
+	DatabaseManager::instance().executeQuery(query, sql, params);
 	this->close();
 }
 

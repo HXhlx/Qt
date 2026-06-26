@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 #include <QMainWindow>
 #include <QtCharts>
 #include <QtSql>
 #include "HX.h"
 #include "ui_Consumer.h"
-using namespace QtCharts;
+
 class Consumer : public QMainWindow
 {
 	Q_OBJECT
@@ -18,7 +18,7 @@ private:
 	QString Name;
 	QString Password;
 	QString Phone;
-	ULONGLONG CustomerID;
+	quint64 CustomerID;
 	Ui::Consumer ui;
 	void opentable();
 	void Show();
